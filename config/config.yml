@@ -1,0 +1,10 @@
+server:
+  Addr: 0.0.0.0
+  Port: 5001
+
+database:
+  Host: "192.168.0.40"
+  User: "postgres"
+  Pass: "123"
+  DBName: "swdb"
+  DBFlags: "?sslmode=disable"

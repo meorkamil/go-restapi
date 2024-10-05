@@ -3,7 +3,12 @@ package util
 import (
 	"encoding/json"
 	"fmt"
+	"go-restapi/internal/model"
+	"log"
 	"net/http"
+	"os"
+
+	"github.com/spf13/viper"
 )
 
 func Decode[T any](r *http.Request) (T, error) {
@@ -29,4 +34,30 @@ func Encode[T any](w http.ResponseWriter, r *http.Request, status int, v T) erro
 	}
 
 	return nil
+}
+
+func ConfigInit(c string) *model.Config {
+
+	viper.SetConfigType("yaml")
+	viper.SetConfigFile(c)
+
+	log.Println("Loaded configuration:", c)
+
+	if err := viper.ReadInConfig(); err != nil {
+
+		fmt.Println("fatal error config file: default \n", err)
+		os.Exit(1)
+	}
+
+	var config model.Config
+
+	if err := viper.Unmarshal(&config); err != nil {
+
+		log.Fatal(err)
+		os.Exit(1)
+
+	}
+
+	return &config
+
 }
