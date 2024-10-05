@@ -34,6 +34,6 @@ database:
   Host: "192.168.0.40"
   User: "postgres"
   Pass: "123"
-  DBName: "swdb"
+  DBName: "kamil"
   DBFlags: "?sslmode=disable"
 ```
