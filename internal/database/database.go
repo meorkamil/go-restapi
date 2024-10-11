@@ -1,77 +1,93 @@
 package database
 
 import (
-	"database/sql"
 	"go-restapi/internal/model"
 	"go-restapi/internal/util"
 
 	_ "github.com/lib/pq"
+	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 var (
-	db *sql.DB
 	lg = util.NewLogger()
+	db *gorm.DB
 )
 
-func InitDB(dsn string) error {
-	var err error
-
-	lg.Info("Connecting to database:", dsn)
-
-	db, err = sql.Open("postgres", dsn)
-	if err != nil {
-		lg.Fatal(err)
-
-	}
-
-	return db.Ping()
+type dbConfig struct {
+	//config  *model.Config
+	Host    string
+	User    string
+	Pass    string
+	Port    string
+	DBName  string
+	DBFlags string
+	Type    string
 }
 
-func Select(emp *model.Employee) []model.Employee {
-
-	rows, err := db.Query("SELECT * FROM employee WHERE empid = ($1) LIMIT 1", emp.Empid)
-
-	if err != nil {
-		lg.Fatal("Select data failed ", err)
-		return nil
+func InitDB(c *model.Config) *dbConfig {
+	return &dbConfig{
+		Host:    c.Database.Host,
+		User:    c.Database.User,
+		Pass:    c.Database.Pass,
+		DBName:  c.Database.DBName,
+		DBFlags: c.Database.DBFlags,
+		Type:    c.Database.Type,
 	}
 
-	var listOfEmployee []model.Employee
-
-	for rows.Next() {
-		var emp model.Employee
-		if err := rows.Scan(&emp.Empid, &emp.Name, &emp.Dept); err != nil {
-
-			lg.Fatal("Error mapping data")
-		}
-
-		listOfEmployee = append(listOfEmployee, emp)
-	}
-
-	return listOfEmployee
 }
 
-func ListEmployee() []model.Employee {
-	rows, err := db.Query("SELECT * FROM employee;")
-
-	if err != nil {
-		lg.Fatal("Select data failed ", err)
-		return nil
-	}
-
-	var listOfEmployee []model.Employee
-
-	for rows.Next() {
-
-		var emp model.Employee
-		if err := rows.Scan(&emp.Empid, &emp.Name, &emp.Dept); err != nil {
-
-			lg.Fatal("Error mapping data")
-
+// Create connection
+func (c *dbConfig) Con() *gorm.DB {
+	// Create connection based on database type
+	switch {
+	case c.Type == "mysql":
+		/// Do mysql connection proceed with postgres for now
+		db, err := gorm.Open(
+			mysql.Open(c.dsn()),
+			&gorm.Config{},
+		)
+		if err != nil {
+			lg.Fatal("GORM open database connection failed:", err)
 		}
+		return db
+	default:
+		db, err := gorm.Open(
+			postgres.Open(c.dsn()),
+			&gorm.Config{},
+		)
+		if err != nil {
+			lg.Fatal("GORM open database connection failed:", err)
+		}
+		return db
+	}
+	return db
+}
 
-		listOfEmployee = append(listOfEmployee, emp)
+// Create automication GORM
+func (c *dbConfig) Migration() error {
+	// Run AutoMigrate
+	if err := c.Con().AutoMigrate(
+		&model.Employee{},
+		&model.Product{},
+	); err != nil {
+		return err
 	}
 
-	return listOfEmployee
+	lg.Info("GORM AutoMigrate Completed")
+
+	return nil
+}
+
+// Create connection string
+func (c *dbConfig) dsn() string {
+	// Return a string of dsn for open a connection
+	switch {
+	case c.Type == "mysql":
+		// Create mysql connection string
+		return c.User + ":" + c.Pass + "@tcp(" + c.Host + c.Port + ")/" + c.DBName + c.DBFlags
+	default:
+		return "host=" + c.Host + " password=" + c.Pass + " user=" + c.User + " dbname=" + c.DBName + " " + c.DBFlags
+	}
 }

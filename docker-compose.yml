@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:16.4
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: kamil
+  rest:
+    image: golang:1.23.0-alpine3.19
+    depends_on: 
+      - db
+    ports:
+      - 5001:5001
+    entrypoint: ["/app/script/entrypoint.sh"]
+    volumes:
+      - "./:/app"
+    environment:
+      VERSION: v1.0.2

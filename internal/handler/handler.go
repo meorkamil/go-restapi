@@ -5,55 +5,64 @@ import (
 	"go-restapi/internal/database"
 	"go-restapi/internal/model"
 	"go-restapi/internal/util"
-	"log"
 	"net/http"
+
+	"gorm.io/gorm"
 )
 
-func GetEmployeeById(w http.ResponseWriter, r *http.Request) {
+var lg = util.NewLogger()
 
-	emp, err := util.Decode[model.Employee](r)
-
-	if err != nil {
-
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
-
+// Default route
+func DefaultRouter() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "RESTful API")
 	}
-
-	req := &model.Employee{
-		Empid: emp.Empid,
-		Name:  emp.Name,
-		Dept:  emp.Dept,
-	}
-
-	log.Println(r.Method, r.URL, ": Requeest data from db")
-
-	data := database.Select(req)
-
-	if err := util.Encode(w, r, http.StatusOK, data); err != nil {
-
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-
-	}
-
 }
 
-func ListEmployee(w http.ResponseWriter, r *http.Request) {
+// GET /employee
+func ListEmployee(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Init repository
+		repo := database.InitRepo(db)
+		employee, err := repo.FindAll()
+		if err != nil {
+			lg.Fatal(err)
+		}
 
-	log.Println(r.Method, r.URL, ": Request data from db")
+		switch {
+		case len(employee) == 0:
+			lg.Info("Empty employee:", employee)
+		default:
+			lg.Info("Employee data", employee)
+		}
 
-	data := database.ListEmployee()
-
-	if err := util.Encode(w, r, http.StatusOK, data); err != nil {
-
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-
+		if err := util.Encode(w, r, http.StatusOK, employee); err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
 	}
-
 }
 
-func DefaultRouter(w http.ResponseWriter, r *http.Request) {
+// POST /employee
+func CreateEmployee(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Decode payload
+		employee, err := util.Decode[model.Employee](r)
+		switch {
+		case err != nil:
+			http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		default:
+			repo := database.InitRepo(db)
+			err := repo.CreateEmployee(&employee)
 
-	log.Println(r.URL)
-	fmt.Fprintf(w, "RESTful API")
+			if err != nil {
+				lg.Fatal("GORM Create employee failed:", err)
+			}
 
+			// Decode back to client
+			if err := util.Encode(w, r, http.StatusOK, employee); err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			}
+
+		}
+	}
 }

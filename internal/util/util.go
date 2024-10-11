@@ -42,7 +42,7 @@ func ConfigInit(c string) *model.Config {
 	viper.SetConfigType("yaml")
 	viper.SetConfigFile(c)
 
-	lg.Info("Loaded configuration:", c)
+	lg.Info("Configuration:", c)
 
 	if err := viper.ReadInConfig(); err != nil {
 
