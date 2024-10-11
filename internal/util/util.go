@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"go-restapi/internal/model"
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/spf13/viper"
 )
+
+var lg = NewLogger()
 
 func Decode[T any](r *http.Request) (T, error) {
 
@@ -41,11 +42,11 @@ func ConfigInit(c string) *model.Config {
 	viper.SetConfigType("yaml")
 	viper.SetConfigFile(c)
 
-	log.Println("Loaded configuration:", c)
+	lg.Info("Loaded configuration:", c)
 
 	if err := viper.ReadInConfig(); err != nil {
 
-		fmt.Println("fatal error config file: default \n", err)
+		lg.Fatal("fatal error config file: default \n", err)
 		os.Exit(1)
 	}
 
@@ -53,7 +54,7 @@ func ConfigInit(c string) *model.Config {
 
 	if err := viper.Unmarshal(&config); err != nil {
 
-		log.Fatal(err)
+		lg.Fatal(err)
 		os.Exit(1)
 
 	}

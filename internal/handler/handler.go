@@ -2,8 +2,8 @@ package handler
 
 import (
 	"fmt"
+	"go-restapi/internal/database"
 	"go-restapi/internal/model"
-	"go-restapi/internal/store"
 	"go-restapi/internal/util"
 	"log"
 	"net/http"
@@ -27,7 +27,7 @@ func GetEmployeeById(w http.ResponseWriter, r *http.Request) {
 
 	log.Println(r.Method, r.URL, ": Requeest data from db")
 
-	data := store.Select(req)
+	data := database.Select(req)
 
 	if err := util.Encode(w, r, http.StatusOK, data); err != nil {
 
@@ -41,7 +41,7 @@ func ListEmployee(w http.ResponseWriter, r *http.Request) {
 
 	log.Println(r.Method, r.URL, ": Request data from db")
 
-	data := store.ListEmployee()
+	data := database.ListEmployee()
 
 	if err := util.Encode(w, r, http.StatusOK, data); err != nil {
 
