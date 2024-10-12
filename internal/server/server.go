@@ -14,28 +14,34 @@ var lg = util.NewLogger()
 
 type APIServer struct {
 	listenAddr string
-	dbDsn      string
+	config     *model.Config
 }
 
 func NewAPIServer(cfg *model.Config) *APIServer {
-	dbDsn := "postgresql://" + cfg.Database.User + ":" + cfg.Database.Pass + "@" + cfg.Database.Host + "/" + cfg.Database.DBName + cfg.Database.DBFlags
-
+	// Return APIServer sturct
 	return &APIServer{
-		listenAddr: net.JoinHostPort(cfg.Server.Addr, strconv.Itoa(cfg.Server.Port)),
-		dbDsn:      dbDsn,
+		listenAddr: net.JoinHostPort(
+			cfg.Server.Addr,
+			strconv.Itoa(cfg.Server.Port),
+		),
+		config: cfg,
 	}
 }
 
 func (s *APIServer) Run() error {
-	mux := router.CreateRouter()
+	// Initialize database
+	db := database.InitDB(s.config)
+	con := db.Con()
 
-	if err := database.InitDB(s.dbDsn); err != nil {
-
-		lg.Fatal("Init DB failed !!!", err)
+	// Run AutoMigrate based on model
+	if err := db.Migration(); err != nil {
+		lg.Fatal("GORM Migration failed", err)
 	}
 
+	// Start server
 	lg.Info("Starting server:", s.listenAddr)
 
+	mux := router.CreateRouter(con)
 	if err := http.ListenAndServe(s.listenAddr, mux); err != nil {
 		lg.Fatal("Failed to start server", err)
 	}

@@ -1,23 +1,14 @@
 # go-http
 
-
 Just having fun during free time with go.
 
-
-# Pre
-
-- PostgreSQL server require, tested with PG 16
-- Restore SQL file in `db/employee.sql`
-
-# How to Build
+# How to build or run
 
 ```
-make build
-```
+# Build with docker just use docker-compose
+docker-compose up
 
-# How to run
-
-```
+# To build
 make run
 ```
 
@@ -31,9 +22,11 @@ server:
   Port: 5001
 
 database:
-  Host: "192.168.0.40"
+  Host: "db"
+  Port: "5432"
   User: "postgres"
-  Pass: "123"
+  Pass: "postgres"
   DBName: "kamil"
-  DBFlags: "?sslmode=disable"
+  DBFlags: "sslmode=disable"
+  Type: "postgresql" # PostgreSQL will be default DB, support MySQL
 ```
