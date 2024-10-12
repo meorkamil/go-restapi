@@ -1,6 +1,7 @@
 package database
 
 import (
+	"errors"
 	"go-restapi/internal/model"
 
 	"gorm.io/gorm"
@@ -25,13 +26,28 @@ func (repo *EmployeeRepository) FindAll() ([]model.Employee, error) {
 }
 
 // Find by id employee
-func (repo *EmployeeRepository) FindByID(id uint) (model.Employee, error) {
+func (repo *EmployeeRepository) FindByID(empid string, password string) (model.Employee, error) {
 	var employee model.Employee
-	result := repo.DB.First(&employee, id)
+	result := repo.DB.Where("empid = ? AND password = ?", empid, password).First(&employee)
 	return employee, result.Error
 }
 
 // Create employee
 func (repo *EmployeeRepository) CreateEmployee(employee *model.Employee) error {
 	return repo.DB.Create(employee).Error
+}
+
+// Create app user
+func (repo *EmployeeRepository) CreateAppUser(employee *model.Employee) error {
+	err := repo.DB.First(&employee, "empid = ?", employee.Empid).Error
+	switch {
+	case err != nil:
+		return repo.DB.Create(employee).Error
+	case errors.Is(err, gorm.ErrRecordNotFound):
+		return repo.DB.Create(employee).Error
+	default:
+		return nil
+	}
+
+	return nil
 }

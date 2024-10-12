@@ -17,5 +17,3 @@ services:
     entrypoint: ["/app/script/entrypoint.sh"]
     volumes:
       - "./:/app"
-    environment:
-      VERSION: v1.0.2

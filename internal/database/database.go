@@ -16,7 +16,6 @@ var (
 )
 
 type dbConfig struct {
-	//config  *model.Config
 	Host    string
 	User    string
 	Pass    string
@@ -35,7 +34,6 @@ func InitDB(c *model.Config) *dbConfig {
 		DBFlags: c.Database.DBFlags,
 		Type:    c.Database.Type,
 	}
-
 }
 
 // Create connection
