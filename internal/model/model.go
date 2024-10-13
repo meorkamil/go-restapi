@@ -3,10 +3,10 @@ package model
 import "time"
 
 type Employee struct {
-	Id        uint      `gorm:"primaryKey"`
-	Empid     string    `json:"empid"`
+	Empid     string    `gorm:"primaryKey"`
 	Name      string    `json:"name"`
 	Dept      string    `json:"dept"`
+	Password  string    `json:"password"`
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 	UpdateAt  time.Time `gorm:"autoCreateTime"`
 	DeletedAt time.Time `gorm:"autoCreateTime"`
@@ -32,4 +32,16 @@ type Config struct {
 		DBFlags string `yaml:"DBFlags"`
 		Type    string `yaml:"Type"`
 	} `yaml:"database"`
+	Jwt struct {
+		SecretKey string `yaml:"SecretKey"`
+	} `yaml:"jwt"`
+	AppAdmin struct {
+		Enable bool   `yaml:"enable"`
+		User   string `yaml:"enable"`
+		Pass   string `yaml:"pass"`
+	} `yaml:"appadmin"`
+}
+
+type Token struct {
+	Raw string `json:"token"`
 }

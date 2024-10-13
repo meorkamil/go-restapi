@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"go-restapi/internal/database"
 	"go-restapi/internal/model"
 	"go-restapi/internal/util"
@@ -9,15 +8,6 @@ import (
 
 	"gorm.io/gorm"
 )
-
-var lg = util.NewLogger()
-
-// Default route
-func DefaultRouter() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "RESTful API")
-	}
-}
 
 // GET /employee
 func ListEmployee(db *gorm.DB) http.HandlerFunc {
@@ -53,16 +43,13 @@ func CreateEmployee(db *gorm.DB) http.HandlerFunc {
 		default:
 			repo := database.InitRepo(db)
 			err := repo.CreateEmployee(&employee)
-
 			if err != nil {
 				lg.Fatal("GORM Create employee failed:", err)
 			}
-
 			// Decode back to client
 			if err := util.Encode(w, r, http.StatusOK, employee); err != nil {
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			}
-
 		}
 	}
 }

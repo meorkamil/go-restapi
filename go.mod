@@ -3,8 +3,10 @@ module go-restapi
 go 1.23.0
 
 require (
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/lib/pq v1.10.9
 	github.com/spf13/viper v1.19.0
+	gorm.io/driver/mysql v1.5.7
 	gorm.io/driver/postgres v1.5.9
 	gorm.io/gorm v1.25.12
 )
@@ -38,5 +40,4 @@ require (
 	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gorm.io/driver/mysql v1.5.7 // indirect
 )

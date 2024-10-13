@@ -10,3 +10,11 @@ database:
   DBName: "kamil"
   DBFlags: "sslmode=disable"
   #Type: "postgresql" # PostgreSQL will be default DB
+
+appadmin:
+  enable: true
+  user: admin
+  pass: admin
+
+jwt:
+  SecretKey: "xx"
