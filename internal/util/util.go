@@ -41,7 +41,6 @@ func ConfigInit(c string) *model.Config {
 
 	lg.Info("Configuration:", c)
 	if err := viper.ReadInConfig(); err != nil {
-
 		lg.Fatal("fatal error config file: default \n", err)
 		os.Exit(1)
 	}

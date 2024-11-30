@@ -48,6 +48,4 @@ func (repo *EmployeeRepository) CreateAppUser(employee *model.Employee) error {
 	default:
 		return nil
 	}
-
-	return nil
 }

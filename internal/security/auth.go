@@ -41,8 +41,6 @@ func Auth(db *gorm.DB, u *model.Employee) (*AuthConfig, error) {
 			User: u,
 		}, nil
 	}
-
-	return &AuthConfig{}, nil
 }
 
 func (a *AuthConfig) CreateToken() (string, error) {
