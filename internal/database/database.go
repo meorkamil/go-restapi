@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"go-restapi/internal/model"
 	"go-restapi/internal/util"
 
@@ -37,7 +38,7 @@ func InitDB(c *model.Config) *dbConfig {
 }
 
 // Create connection
-func (c *dbConfig) Con() *gorm.DB {
+func (c *dbConfig) Con() (*gorm.DB, error) {
 	// Create connection based on database type
 	switch {
 	case c.Type == "mysql":
@@ -48,30 +49,33 @@ func (c *dbConfig) Con() *gorm.DB {
 		)
 		if err != nil {
 			lg.Fatal("GORM open database connection failed:", err)
+			return nil, fmt.Errorf("GORM open database connection failed: %s", err)
 		}
-		return db
+		return db, nil
 	default:
 		db, err := gorm.Open(
 			postgres.Open(c.dsn()),
 			&gorm.Config{},
 		)
 		if err != nil {
-			lg.Fatal("GORM open database connection failed:", err)
+			return nil, fmt.Errorf("GORM open database connection failed: %s", err)
 		}
-		return db
+		return db, nil
 	}
-	return db
 }
 
 // Create automication GORM
 func (c *dbConfig) Migration() error {
 	// Run AutoMigrate
-	if err := c.Con().AutoMigrate(
+	m, err := c.Con()
+	if err != nil {
+		return fmt.Errorf("GORM Migration failed: %s", err)
+	}
+
+	m.AutoMigrate(
 		&model.Employee{},
 		&model.Product{},
-	); err != nil {
-		return err
-	}
+	)
 
 	lg.Info("GORM AutoMigrate Completed")
 

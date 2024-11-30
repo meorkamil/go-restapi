@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"go-restapi/internal/database"
 	"go-restapi/internal/model"
 	"go-restapi/internal/router"
@@ -26,6 +27,7 @@ func NewAPIServer(cfg *model.Config) *APIServer {
 			cfg.Server.Addr,
 			strconv.Itoa(cfg.Server.Port),
 		),
+
 		config: cfg,
 	}
 }
@@ -33,17 +35,20 @@ func NewAPIServer(cfg *model.Config) *APIServer {
 func (s *APIServer) Run() error {
 	// Initialize database
 	db := database.InitDB(s.config)
-	con := db.Con()
+
+	con, err := db.Con()
+	if err != nil {
+		return fmt.Errorf("GORM Connection Failed: %s", err)
+	}
 
 	// Run AutoMigrate based on model
 	if err := db.Migration(); err != nil {
-		lg.Fatal("GORM Migration failed", err)
+		return fmt.Errorf("GORM Migration failed %s", err)
 	}
 	switch {
 	case s.config.AppAdmin.Enable:
 		if err := appUser(s, con); err != nil {
-			lg.Fatal("App User creation failed", err)
-
+			return fmt.Errorf("App User creation failed %s", err)
 		}
 	default:
 		lg.Info("Skip application user creation")
@@ -54,7 +59,7 @@ func (s *APIServer) Run() error {
 
 	mux := router.CreateRouter(con)
 	if err := http.ListenAndServe(s.listenAddr, mux); err != nil {
-		lg.Fatal("Failed to start server", err)
+		return fmt.Errorf("Failed to start server %s", err)
 	}
 
 	return nil
@@ -71,7 +76,7 @@ func appUser(s *APIServer, db *gorm.DB) error {
 
 	repo := database.InitRepo(db)
 	if err := repo.CreateAppUser(&appUser); err != nil {
-		lg.Fatal("Failed to create user")
+		return fmt.Errorf("Failed to create user")
 	}
 
 	return nil

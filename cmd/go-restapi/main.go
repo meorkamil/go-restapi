@@ -6,7 +6,7 @@ import (
 	"go-restapi/internal/util"
 )
 
-var version = "v1.0.3"
+var version = "v1.0.4"
 var lg = util.NewLogger()
 
 func main() {

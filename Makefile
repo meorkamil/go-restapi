@@ -1,8 +1,11 @@
 BIN_NAME=go-restapi
 CMD_DIR=cmd
-VERSION=v1.0.3
+VERSION=v1.0.4
 BUILD_DIR=build
 CONFIG_PATH=./config/config.yml
+
+debug:
+	cd ${CMD_DIR}/${BIN_NAME} && go run main.go
 
 build:
 	go build -C ${CMD_DIR}/${BIN_NAME}  -o ../../${BUILD_DIR}/${BIN_NAME}
