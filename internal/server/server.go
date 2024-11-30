@@ -38,17 +38,17 @@ func (s *APIServer) Run() error {
 
 	con, err := db.Con()
 	if err != nil {
-		return fmt.Errorf("GORM Connection Failed: %s", err)
+		return fmt.Errorf("Server %s", err)
 	}
 
 	// Run AutoMigrate based on model
 	if err := db.Migration(); err != nil {
-		return fmt.Errorf("GORM Migration failed %s", err)
+		return fmt.Errorf("Server %s", err)
 	}
 	switch {
 	case s.config.AppAdmin.Enable:
 		if err := appUser(s, con); err != nil {
-			return fmt.Errorf("App User creation failed %s", err)
+			return fmt.Errorf("Server %s", err)
 		}
 	default:
 		lg.Info("Skip application user creation")
@@ -59,7 +59,7 @@ func (s *APIServer) Run() error {
 
 	mux := router.CreateRouter(con)
 	if err := http.ListenAndServe(s.listenAddr, mux); err != nil {
-		return fmt.Errorf("Failed to start server %s", err)
+		return fmt.Errorf("Server %s", err)
 	}
 
 	return nil
@@ -76,7 +76,7 @@ func appUser(s *APIServer, db *gorm.DB) error {
 
 	repo := database.InitRepo(db)
 	if err := repo.CreateAppUser(&appUser); err != nil {
-		return fmt.Errorf("Failed to create user")
+		return fmt.Errorf("Server create user %s", err)
 	}
 
 	return nil

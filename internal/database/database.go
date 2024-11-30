@@ -4,11 +4,15 @@ import (
 	"fmt"
 	"go-restapi/internal/model"
 	"go-restapi/internal/util"
+	"io"
+	"log"
+	"time"
 
 	_ "github.com/lib/pq"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var (
@@ -39,26 +43,41 @@ func InitDB(c *model.Config) *dbConfig {
 
 // Create connection
 func (c *dbConfig) Con() (*gorm.DB, error) {
+	// Set default logger
+	sqlLog := logger.New(
+		log.New(io.Discard, "", 0),
+		logger.Config{
+			SlowThreshold:             time.Second,
+			LogLevel:                  logger.Silent,
+			IgnoreRecordNotFoundError: true,
+			ParameterizedQueries:      true,
+		},
+	)
+
 	// Create connection based on database type
 	switch {
 	case c.Type == "mysql":
 		/// Do mysql connection proceed with postgres for now
 		db, err := gorm.Open(
 			mysql.Open(c.dsn()),
-			&gorm.Config{},
+			&gorm.Config{
+				Logger: sqlLog,
+			},
 		)
 		if err != nil {
-			lg.Fatal("GORM open database connection failed:", err)
-			return nil, fmt.Errorf("GORM open database connection failed: %s", err)
+			lg.Fatal("Database", err)
+			return nil, fmt.Errorf("Database %s", err)
 		}
 		return db, nil
 	default:
 		db, err := gorm.Open(
 			postgres.Open(c.dsn()),
-			&gorm.Config{},
+			&gorm.Config{
+				Logger: sqlLog,
+			},
 		)
 		if err != nil {
-			return nil, fmt.Errorf("GORM open database connection failed: %s", err)
+			return nil, fmt.Errorf("Database %s", err)
 		}
 		return db, nil
 	}
@@ -69,7 +88,7 @@ func (c *dbConfig) Migration() error {
 	// Run AutoMigrate
 	m, err := c.Con()
 	if err != nil {
-		return fmt.Errorf("GORM Migration failed: %s", err)
+		return fmt.Errorf("Database %s", err)
 	}
 
 	m.AutoMigrate(
