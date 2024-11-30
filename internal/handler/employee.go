@@ -21,7 +21,7 @@ func ListEmployee(db *gorm.DB) http.HandlerFunc {
 
 		switch {
 		case len(employee) == 0:
-			lg.Info("Empty employee:", employee)
+			lg.Info("Employee:", employee)
 		default:
 			lg.Info("Employee data", employee)
 		}
@@ -44,7 +44,7 @@ func CreateEmployee(db *gorm.DB) http.HandlerFunc {
 			repo := database.InitRepo(db)
 			err := repo.CreateEmployee(&employee)
 			if err != nil {
-				lg.Fatal("GORM Create employee failed:", err)
+				lg.Fatal("Create employee", err)
 			}
 			// Decode back to client
 			if err := util.Encode(w, r, http.StatusOK, employee); err != nil {

@@ -1,6 +1,6 @@
 BIN_NAME=go-restapi
 CMD_DIR=cmd
-VERSION=v1.0.4
+VERSION=v1.0.5
 BUILD_DIR=build
 CONFIG_PATH=./config/config.yml
 
