@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-var version = "v1.0.5"
+var version = "v1.0.6"
 var lg = util.NewLogger()
 
 func main() {
