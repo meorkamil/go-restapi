@@ -1,6 +1,8 @@
 package server
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"go-restapi/internal/database"
 	"go-restapi/internal/model"
@@ -8,7 +10,11 @@ import (
 	"go-restapi/internal/util"
 	"net"
 	"net/http"
+	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -54,13 +60,35 @@ func (s *APIServer) Run() error {
 		lg.Info("Skip application user creation")
 	}
 
-	// Start server
-	lg.Info("Starting server:", s.listenAddr)
-
+	// Setup server with graceful shutdown
 	mux := router.CreateRouter(con)
-	if err := http.ListenAndServe(s.listenAddr, mux); err != nil {
-		return fmt.Errorf("Server %s", err)
+
+	server := &http.Server{
+		Addr:    s.listenAddr,
+		Handler: mux,
 	}
+
+	// Graceful shutdown
+	go func() {
+		lg.Info("Starting Server", server.Addr)
+		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+			lg.Fatal("Server HTTP shutdown error:", err)
+		}
+		lg.Info("Server stopped serving new connections.")
+	}()
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
+
+	shutdownCtx, shutdownRelease := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownRelease()
+
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		return fmt.Errorf("Server HTTP shutdown error %s", err)
+	}
+
+	lg.Info("Server Shutdown Completed.")
 
 	return nil
 }
