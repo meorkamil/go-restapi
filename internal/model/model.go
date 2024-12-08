@@ -20,20 +20,20 @@ type Product struct {
 
 type Config struct {
 	Server struct {
-		Addr string `yaml:"Addr"`
-		Port int    `yaml:"Port"`
+		Addr string `yaml:"addr"`
+		Port int    `yaml:"port"`
 	} `yaml:"server"`
 	Database struct {
-		Host    string `yaml:"Host"`
-		User    string `yaml:"User"`
-		Pass    string `yaml:"Pass"`
-		Port    string `yaml:"Port"`
-		DBName  string `yaml:"DBName"`
-		DBFlags string `yaml:"DBFlags"`
-		Type    string `yaml:"Type"`
+		Host    string `yaml:"host"`
+		User    string `yaml:"user"`
+		Pass    string `yaml:"pass"`
+		Port    string `yaml:"port"`
+		DBName  string `yaml:"dbname"`
+		DBFlags string `yaml:"dbflags"`
+		Type    string `yaml:"type"`
 	} `yaml:"database"`
 	Jwt struct {
-		SecretKey string `yaml:"SecretKey"`
+		SecretKey string `yaml:"secretkey"`
 	} `yaml:"jwt"`
 	AppAdmin struct {
 		Enable bool   `yaml:"enable"`
