@@ -1,15 +1,15 @@
 server:
-  Addr: 0.0.0.0
-  Port: 5001
+  addr: 0.0.0.0
+  port: 5001
 
 database:
-  Host: "db"
-  Port: "5432"
-  User: "postgres"
+  host: "db"
+  port: "5432"
+  user: "postgres"
   Pass: "postgres"
-  DBName: "kamil"
-  DBFlags: "sslmode=disable"
-  #Type: "postgresql" # PostgreSQL will be default DB
+  dbname: "kamil"
+  dbflags: "sslmode=disable"
+  #type: "postgresql" # PostgreSQL will be default DB
 
 appadmin:
   enable: true
@@ -17,4 +17,4 @@ appadmin:
   pass: admin
 
 jwt:
-  SecretKey: "xx"
+  secretkey: "xx"
